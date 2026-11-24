@@ -1,0 +1,6 @@
+numpy>=1.26,<3
+sounddevice>=0.4.6
+SpeechRecognition>=3.10
+pyttsx3>=2.90
+PyAudio>=0.2.14
+vosk>=0.3.45

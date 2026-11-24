@@ -1,0 +1,11 @@
+dados/
+.venv/
+.venv-web/
+__pycache__/
+*.pyc
+*.mp3
+.env
+.venv-web-win/
+modelos/*/
+*.sqlite3
+*.sqlite3-*

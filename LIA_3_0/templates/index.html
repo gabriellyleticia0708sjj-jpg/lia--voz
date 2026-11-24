@@ -1,0 +1,1752 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#140c22">
+
+<title>LIA — Personal Intelligence</title>
+
+<link rel="manifest" href="/static/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/style.css">
+
+<script>
+try {
+    document.documentElement.dataset.liaTheme =
+        localStorage.getItem("lia-interface-theme") === "light"
+        ? "light" : "dark";
+} catch {
+    document.documentElement.dataset.liaTheme = "dark";
+}
+</script>
+
+<style>
+
+/* ======================================
+   LIA ECLIPSE — IDENTIDADE VISUAL
+====================================== */
+
+:root {
+    color-scheme: dark;
+    --background: #050307;
+    --text: #f4eaff;
+    --muted: #b1a4c4;
+    --violet: #bd91ff;
+    --line: #b88bff30;
+    --surface: #171122;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: radial-gradient(
+        ellipse at 50% 38%,
+        #1d1034 0%,
+        #0a0712 42%,
+        #040307 85%
+    );
+    font-family: system-ui, sans-serif;
+    overflow: hidden;
+    min-height: 100dvh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .25;
+    background-image:
+        linear-gradient(#a78bfa08 1px, transparent 1px),
+        linear-gradient(90deg, #a78bfa08 1px, transparent 1px);
+    background-size: 70px 70px;
+    mask-image: radial-gradient(ellipse, #000, transparent 80%);
+}
+
+/* CABEÇALHO */
+
+.lia-top {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 36px;
+    background: transparent;
+}
+
+.lia-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: .24em;
+}
+
+.lia-brand small {
+    display: none;
+}
+
+.lia-symbol {
+    width: 10px;
+    height: 10px;
+    border: 1px solid #c994ff;
+    transform: rotate(45deg);
+    box-shadow: 0 0 15px #b16aff;
+}
+
+.lia-top-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lia-clock {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.lia-icon,
+#menu {
+    position: static;
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #ffffff06;
+    color: inherit;
+    cursor: pointer;
+}
+
+#menu {
+    font-size: 19px;
+    letter-spacing: 0;
+}
+
+.lia-icon svg,
+.lia-short svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* INTERFACE CENTRAL */
+
+#lia-main {
+    --orb-size: min(46dvh, 84vw, 500px);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100dvh;
+    max-width: 950px;
+    margin: auto;
+    padding: 80px 28px 24px;
+    gap: 12px;
+    overflow: auto;
+    min-height: 0;
+}
+
+.lia-core {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    flex-shrink: 0;
+    isolation: isolate;
+    min-width: 0;
+}
+
+.lia-core::before {
+    content: "";
+    position: absolute;
+    width: 65%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #7c3aed16;
+    filter: blur(42px);
+    z-index: -1;
+}
+
+#lia-main #orb,
+#lia-main.has-reply #orb {
+    width: var(--orb-size);
+    height: auto;
+    aspect-ratio: 1;
+    display: block;
+    max-width: 100%;
+    cursor: grab;
+    touch-action: pan-y;
+}
+
+#orb:active {
+    cursor: grabbing;
+}
+
+.lia-hud {
+    display: none !important;
+}
+
+/* SAUDAÇÃO E ESTADO */
+
+.lia-intro {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.lia-intro h1 {
+    font-size: clamp(23px, 3vw, 36px);
+    font-weight: 400;
+    letter-spacing: -.045em;
+    margin: 12px 0 8px;
+}
+
+.lia-intro p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.lia-intro h1,
+.lia-intro p {
+    max-height: 80px;
+    overflow: hidden;
+    transition:
+        opacity .35s ease,
+        max-height .35s ease,
+        margin .35s ease;
+}
+
+.lia-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 30px;
+    background: #b88bff0d;
+    color: #d5bcfa;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+}
+
+.lia-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #b58aff;
+    box-shadow: 0 0 10px #b58aff;
+}
+
+.lia-state[data-mode="listening"] .lia-dot,
+.lia-state[data-mode="thinking"] .lia-dot {
+    background: #e0b3ff;
+    box-shadow: 0 0 10px #d2a0ff;
+}
+
+.lia-state[data-mode="speaking"] .lia-dot {
+    background: #f5dcff;
+    box-shadow: 0 0 18px #d2a0ff;
+}
+
+/* TEXTOS DINÂMICOS */
+
+#lia-main.has-reply .lia-intro h1,
+#lia-main.has-reply .lia-intro p,
+#lia-main[data-conversation="active"] .lia-intro h1,
+#lia-main[data-conversation="active"] .lia-intro p {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    margin: 0;
+}
+
+#reply {
+    flex: 1;
+    min-height: 0;
+    width: min(760px, 100%);
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.65;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    scrollbar-width: thin;
+    scrollbar-color: #5b387f transparent;
+    border: 1px solid transparent;
+    transition: opacity .4s ease;
+}
+
+#reply:empty {
+    padding: 0;
+    flex: 1;
+}
+
+#lia-main.has-reply #reply {
+    background: transparent;
+    border-color: transparent;
+    text-align: center;
+}
+
+#lia-main.has-reply:not(.text-hidden) #reply {
+    min-height: 86px;
+}
+
+#lia-main.text-hidden #reply {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#lia-text-toggle {
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 30px;
+    padding: 5px 13px;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+#lia-text-toggle[hidden] {
+    display: none;
+}
+
+#lia-text-toggle:hover {
+    color: inherit;
+    border-color: #a855f7;
+}
+
+/* ATALHOS */
+
+.lia-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.lia-short {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #d6c2ed;
+    padding: 10px 12px;
+    border-radius: 24px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.lia-short svg {
+    width: 16px;
+    height: 16px;
+    color: #cba8fc;
+}
+
+.lia-short:hover,
+.lia-icon:hover {
+    background: #a855f725;
+}
+
+.lia-short:focus-visible,
+.lia-icon:focus-visible {
+    outline: 2px solid #e0baff;
+    outline-offset: 3px;
+}
+
+/* CAMPO DE CONVERSA */
+
+#chat {
+    display: flex;
+    width: min(760px, 100%);
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    min-width: 0;
+    border-radius: 36px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 60px #0008;
+    backdrop-filter: blur(20px);
+}
+
+#chat button {
+    display: grid;
+    place-items: center;
+    height: 44px;
+    width: 44px;
+    flex-shrink: 0;
+    padding: 0;
+    border-radius: 50%;
+}
+
+#chat button.lia-icon {
+    background: transparent;
+    border-color: transparent;
+    color: #bfa2e9;
+}
+
+#chat button[type="submit"] {
+    background: #b58af6;
+    color: #180d29;
+    border: 0;
+    box-shadow: 0 4px 16px #7c3aed55;
+}
+
+#chat button svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#message {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 5px;
+    font-size: 15px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+}
+
+#message::placeholder {
+    color: #a695bb;
+}
+
+.lia-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 10px;
+    color: var(--muted);
+    width: min(760px, 100%);
+    font-size: 10px;
+    line-height: 1.4;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.lia-foot span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lia-foot span:last-child {
+    white-space: nowrap;
+}
+
+/* ======================================
+   MODO CLARO
+====================================== */
+
+#lia-theme-toggle .theme-moon {
+    display: none;
+}
+
+html[data-lia-theme="light"] #lia-theme-toggle .theme-sun {
+    display: none;
+}
+
+html[data-lia-theme="light"] #lia-theme-toggle .theme-moon {
+    display: block;
+}
+
+html[data-lia-theme="light"] {
+    color-scheme: light;
+    --background: #ffffff;
+    --text: #251936;
+    --muted: #645674;
+    --violet: #7742b4;
+    --line: #7542b42b;
+    --surface: #ffffff;
+}
+
+html[data-lia-theme="light"] body {
+    color: var(--text);
+    background: radial-gradient(
+        ellipse at 50% 35%,
+        #e8dcf9 0%,
+        #f8f5fc 52%,
+        #ffffff 90%
+    );
+}
+
+html[data-lia-theme="light"] body::before {
+    opacity: .5;
+    background-image:
+        linear-gradient(#7542b411 1px, transparent 1px),
+        linear-gradient(90deg, #7542b411 1px, transparent 1px);
+}
+
+html[data-lia-theme="light"] .lia-symbol {
+    background: #8752c7;
+    border-color: #7441aa;
+    box-shadow: 0 0 12px #a855f74d;
+}
+
+html[data-lia-theme="light"] .lia-icon,
+html[data-lia-theme="light"] #menu {
+    color: #583282;
+    background: #ffffffa8;
+    border-color: #7542b430;
+}
+
+html[data-lia-theme="light"] .lia-state {
+    color: #55317f;
+    background: #e5d8f5;
+}
+
+html[data-lia-theme="light"] .lia-dot {
+    background: #7742b4;
+    box-shadow: 0 0 8px #7742b466;
+}
+
+/* Preserva as cores originais do modelo 3D */
+
+html[data-lia-theme="light"] #orb {
+    background: radial-gradient(
+        circle closest-side,
+        #1b0b30 0%,
+        #1c0d31 83%,
+        #24113a 92%,
+        #24113a00 100%
+    );
+    border-radius: 50%;
+}
+
+html[data-lia-theme="light"] .lia-short,
+html[data-lia-theme="light"] .lia-short svg {
+    color: #583282;
+}
+
+html[data-lia-theme="light"] .lia-short:hover,
+html[data-lia-theme="light"] .lia-icon:hover {
+    background: #e6d8f8;
+}
+
+html[data-lia-theme="light"] #chat {
+    background: #fff;
+    border-color: #7542b43b;
+    box-shadow: 0 12px 45px #55317f18;
+}
+
+html[data-lia-theme="light"] #chat button.lia-icon {
+    color: #684196;
+}
+
+html[data-lia-theme="light"] #chat button[type="submit"] {
+    background: #7542b4;
+    color: white;
+}
+
+html[data-lia-theme="light"] #message::placeholder {
+    color: #766787;
+}
+
+html[data-lia-theme="light"] #panel,
+html[data-lia-theme="light"] #tools {
+    color: #251936;
+    background: #fdfaff;
+    border-color: #7542b44d;
+}
+
+html[data-lia-theme="light"] #panel p,
+html[data-lia-theme="light"] #tools p {
+    color: #645674;
+}
+
+html[data-lia-theme="light"] #panel button,
+html[data-lia-theme="light"] #tools button,
+html[data-lia-theme="light"] #reminder-banner button {
+    background: #eee4fa;
+    color: #49296d;
+    border-color: #7542b433;
+}
+
+html[data-lia-theme="light"] #tools nav button.active {
+    background: #7542b4;
+    color: white;
+}
+
+html[data-lia-theme="light"] #panel input:not([type="checkbox"]),
+html[data-lia-theme="light"] #panel select,
+html[data-lia-theme="light"] #tools input:not([type="checkbox"]),
+html[data-lia-theme="light"] #tools textarea,
+html[data-lia-theme="light"] #tools select {
+    background: white;
+    color: #251936;
+    border-color: #7542b44d;
+}
+
+html[data-lia-theme="light"] #tools a {
+    color: #60309b;
+}
+
+html[data-lia-theme="light"] #reminder-banner {
+    color: #251936;
+    background: #fdfaff;
+    border-color: #7542b4;
+}
+
+html[data-lia-theme="light"] :focus-visible {
+    outline-color: #7542b4;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 760px) {
+
+    .lia-top {
+        padding: 14px 17px;
+    }
+
+    .lia-clock {
+        display: none;
+    }
+
+    #lia-main {
+        --orb-size: min(40dvh, 86vw, 500px);
+        padding: 70px 15px 15px;
+        gap: 8px;
+    }
+
+    .lia-intro h1 {
+        font-size: 25px;
+    }
+
+    .lia-short {
+        padding: 7px 6px;
+        font-size: 11px;
+    }
+
+    .lia-shortcuts {
+        gap: 5px;
+    }
+
+    .lia-foot {
+        font-size: 9px;
+    }
+
+}
+
+@media (max-height: 650px) {
+
+    #lia-main {
+        --orb-size: min(32dvh, 80vw, 400px);
+        gap: 5px;
+    }
+
+    .lia-intro h1 {
+        font-size: 22px;
+        margin: 4px 0;
+    }
+
+    .lia-short {
+        padding: 5px 7px;
+    }
+
+}
+
+@media (max-width: 380px) {
+
+    .lia-top-right {
+        gap: 5px;
+    }
+
+    .lia-icon,
+    #menu {
+        width: 36px;
+        height: 36px;
+    }
+
+    .lia-top {
+        padding-inline: 12px;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- CABEÇALHO -->
+
+<header class="lia-top">
+
+    <div class="lia-brand">
+        <span class="lia-symbol"></span>
+        LIA
+        <small>PERSONAL INTELLIGENCE</small>
+    </div>
+
+    <div class="lia-top-right">
+
+        <!-- BOTÃO MODO CLARO E ESCURO -->
+
+        <button type="button"
+                class="lia-icon"
+                id="lia-theme-toggle"
+                aria-label="Ativar modo claro"
+                title="Ativar modo claro"
+                aria-pressed="false">
+
+            <svg class="theme-sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>
+            </svg>
+
+            <svg class="theme-moon" viewBox="0 0 24 24">
+                <path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z"/>
+            </svg>
+
+        </button>
+
+        <span class="lia-clock" id="lia-clock"></span>
+
+        <button type="button"
+                class="lia-icon"
+                data-lia-action="settings"
+                aria-label="Configurações">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v4m0 12v4M2 12h4m12 0h4M5 5l3 3m8 8 3 3M5 19l3-3m8-8 3-3"/>
+            </svg>
+
+        </button>
+
+        <button id="menu"
+                type="button"
+                aria-label="Abrir menu"
+                aria-expanded="false">☰</button>
+
+    </div>
+
+</header>
+
+<!-- INTERFACE PRINCIPAL -->
+
+<main id="lia-main">
+
+    <div class="lia-core">
+
+        <div class="lia-hud left">
+            INTERFACE 01
+            <i></i>
+            <b>NEURAL MATRIX</b>
+            PROJEÇÃO 3D
+            <div class="hud-bars"></div>
+        </div>
+
+        <canvas id="orb"
+                width="520"
+                height="520"
+                role="img"
+                aria-label="Núcleo holográfico tridimensional">
+        </canvas>
+
+        <div class="lia-hud right">
+            INTERFACE 02
+            <i></i>
+            <b>CORE / HUD</b>
+            VISUALIZAÇÃO
+            <div class="hud-bars"></div>
+        </div>
+
+    </div>
+
+    <div class="lia-intro">
+
+        <div class="lia-state"
+             id="lia-state"
+             data-mode="idle">
+
+            <span class="lia-dot"></span>
+            <span id="lia-state-text">Em espera</span>
+
+        </div>
+
+        <h1>Como posso ajudar você hoje?</h1>
+        <p>Aguardando seu comando.</p>
+
+    </div>
+
+    <div id="reply"
+         role="status"
+         aria-live="polite"
+         tabindex="0"></div>
+
+    <button type="button"
+            id="lia-text-toggle"
+            aria-controls="reply"
+            aria-expanded="true"
+            hidden>
+        Ocultar texto
+    </button>
+
+    <!-- ATALHOS -->
+
+    <div class="lia-shortcuts">
+
+        <button type="button"
+                class="lia-short"
+                data-lia-action="search">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"/>
+                <ellipse cx="12" cy="12" rx="4" ry="9"/>
+                <path d="M3 12h18"/>
+            </svg>
+
+            Pesquisa
+
+        </button>
+
+        <button type="button"
+                class="lia-short"
+                data-lia-action="memory">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M9 5a3 3 0 0 0-5 3 4 4 0 0 0 0 7 3 3 0 0 0 5 4V5Zm6 0a3 3 0 0 1 5 3 4 4 0 0 1 0 7 3 3 0 0 1-5 4V5ZM9 9H6m9 6h3"/>
+            </svg>
+
+            Memória
+
+        </button>
+
+        <button type="button"
+                class="lia-short"
+                data-lia-action="agenda">
+
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="16" rx="3"/>
+                <path d="M7 3v4m10-4v4M3 10h18"/>
+            </svg>
+
+            Agenda
+
+        </button>
+
+        <button type="button"
+                class="lia-short"
+                data-lia-action="conversations">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M3 11a9 9 0 1 1 2 7M3 5v6h6m3-4v5l4 2"/>
+            </svg>
+
+            Conversas
+
+        </button>
+
+        <button type="button"
+                class="lia-short"
+                data-lia-action="devices">
+
+            <svg viewBox="0 0 24 24">
+                <rect x="6" y="2" width="12" height="20" rx="3"/>
+                <path d="M11 18h2"/>
+            </svg>
+
+            Dispositivos
+
+        </button>
+
+    </div>
+
+    <!-- CAMPO DE CONVERSA -->
+
+    <form id="chat">
+
+        <button type="button"
+                class="lia-icon"
+                data-lia-action="files"
+                aria-label="Analisar arquivo">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11.5l-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/>
+            </svg>
+
+        </button>
+
+        <input id="message"
+               placeholder="Converse com a LIA..."
+               aria-label="Sua pergunta"
+               maxlength="12000"
+               autocomplete="off">
+
+        <button type="button"
+                class="lia-icon"
+                data-lia-action="listen"
+                aria-label="Falar com a LIA">
+
+            <svg viewBox="0 0 24 24">
+                <rect x="9" y="2" width="6" height="13" rx="3"/>
+                <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>
+            </svg>
+
+        </button>
+
+        <button type="submit" aria-label="Enviar">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M12 19V5m-6 6 6-6 6 6"/>
+            </svg>
+
+        </button>
+
+    </form>
+
+    <footer class="lia-foot">
+
+        <span id="lia-live">
+            Interface pronta
+        </span>
+
+        <span>LIA 5 · HUD 3D</span>
+
+    </footer>
+
+</main>
+
+<!-- MENU DE CONFIGURAÇÕES -->
+
+<aside id="panel" hidden>
+
+    <button id="close">Fechar ×</button>
+
+    <h2>LIA</h2>
+
+    <button id="new">Nova conversa</button>
+    <button id="history">Histórico</button>
+
+    <button id="older" hidden>
+        Ver mensagens anteriores
+    </button>
+
+    <button id="clear">Apagar histórico</button>
+    <button id="memory">Memória pessoal</button>
+    <button id="memory-clear">Apagar memória pessoal</button>
+
+    <div id="memory-list"></div>
+
+    <button id="listen">Ouvir agora</button>
+
+    <h3>Configurações</h3>
+
+    <label>
+        <input type="checkbox" id="lia-auto-hide" checked>
+        Ocultar resposta após a fala (8 segundos)
+    </label>
+
+    <label>
+        Motor
+
+        <select id="backend">
+            <option value="ollama">Ollama</option>
+            <option value="openjarvis">OpenJarvis</option>
+        </select>
+
+    </label>
+
+    <label>
+        Modelo
+
+        <input id="model"
+               value="{{ default_model }}"
+               data-default="{{ default_model }}"
+               list="modelos-ia">
+
+    </label>
+
+    <datalist id="modelos-ia">
+        <option value="llama3.2:1b" label="Rápido">
+        <option value="qwen2.5:3b" label="Equilibrado">
+        <option value="qwen2.5:7b" label="Mais capacidade">
+    </datalist>
+
+    <button id="test-ai">
+        Verificar conexão com a IA
+    </button>
+
+    <p id="ai-status"
+       role="status"
+       aria-live="polite"></p>
+
+    <label>
+        <input type="checkbox" id="speak" checked>
+        Falar respostas
+    </label>
+
+    <label>
+        Voz principal
+
+        <select id="voice-engine">
+            <option value="neural">
+                Francisca Neural (online)
+            </option>
+
+            <option value="browser">
+                Voz do navegador
+            </option>
+        </select>
+
+    </label>
+
+    <label>
+        Voz alternativa
+
+        <select id="voice">
+            <option value="">
+                Automática (português)
+            </option>
+        </select>
+
+    </label>
+
+    <label>
+        Velocidade
+
+        <input id="rate"
+               type="range"
+               min="0.7"
+               max="1.3"
+               step="0.05"
+               value="0.95">
+    </label>
+
+    <label>
+        Tom
+
+        <input id="pitch"
+               type="range"
+               min="0.7"
+               max="1.3"
+               step="0.05"
+               value="1">
+    </label>
+
+    <button id="test-voice">Testar voz</button>
+
+    <label>
+        <input type="checkbox" id="wake">
+        Ativar dizendo LIA
+    </label>
+
+    <label>
+        <input type="checkbox" id="claps">
+        Ativar com duas palmas
+    </label>
+
+    <button id="stop">Desligar microfone</button>
+
+    <p id="heard" aria-live="polite"></p>
+
+    <p id="status" role="status">
+        Microfone desligado.
+    </p>
+
+    <p>
+        O histórico é salvo neste Codespace.
+        A voz neural envia o texto ao serviço de voz online.
+        Não compartilhe dados sensíveis.
+        Mantenha a porta privada.
+        A ativação por palmas é experimental.
+    </p>
+
+    <div id="logs"></div>
+
+    <h3>Ferramentas</h3>
+
+    <button id="tools-open">
+        Abrir ferramentas
+    </button>
+
+    <button id="install-app" hidden>
+        Instalar LIA
+    </button>
+
+</aside>
+
+<!-- FERRAMENTAS DA LIA -->
+
+<dialog id="tools">
+
+    <header>
+        <h2>LIA · Ferramentas</h2>
+        <button id="tools-close">Fechar ×</button>
+    </header>
+
+    <nav id="tool-tabs">
+        <button data-tab="search">Pesquisa</button>
+        <button data-tab="files">Arquivos</button>
+        <button data-tab="agenda">Agenda</button>
+        <button data-tab="conversations">Conversas</button>
+        <button data-tab="prefs">Personalidade</button>
+        <button data-tab="voice">Voz offline</button>
+        <button data-tab="devices">Dispositivos</button>
+    </nav>
+
+    <!-- PESQUISA -->
+
+    <section data-pane="search">
+
+        <h3>Pesquisar na internet</h3>
+
+        <p>
+            A consulta será enviada ao serviço de pesquisa.
+            Não inclua dados pessoais.
+        </p>
+
+        <form id="search-form">
+
+            <input id="search-query"
+                   maxlength="300"
+                   required
+                   placeholder="Assunto para pesquisar">
+
+            <button>Pesquisar</button>
+
+        </form>
+
+        <div id="search-results"></div>
+
+    </section>
+
+    <!-- ARQUIVOS -->
+
+    <section data-pane="files" hidden>
+
+        <h3>Analisar arquivos</h3>
+
+        <label>
+            Tipo
+
+            <select id="file-kind">
+                <option value="pdf">PDF</option>
+                <option value="image">Imagem</option>
+                <option value="code">Código ou projeto ZIP</option>
+            </select>
+
+        </label>
+
+        <input type="file"
+               id="file-input"
+               accept=".pdf">
+
+        <label>
+            Pergunta
+
+            <textarea id="file-question"
+                      maxlength="1000"
+                      placeholder="O que você quer analisar?"></textarea>
+        </label>
+
+        <p>
+            Até 8 MB. PDF: primeiras 30 páginas com texto.
+            Projetos: amostra de até 25 arquivos.
+            Imagens requerem modelo visual.
+            Não envie senhas ou chaves.
+        </p>
+
+        <button id="analyze">Analisar</button>
+
+        <pre id="analysis-result"></pre>
+
+    </section>
+
+    <!-- AGENDA -->
+
+    <section data-pane="agenda" hidden>
+
+        <h3>Agenda e lembretes</h3>
+
+        <form id="agenda-form">
+
+            <input id="event-title"
+                   required
+                   maxlength="200"
+                   placeholder="Título">
+
+            <input type="datetime-local"
+                   id="event-date"
+                   required>
+
+            <select id="event-kind">
+                <option value="lembrete">Lembrete</option>
+                <option value="evento">Evento</option>
+            </select>
+
+            <button>Salvar</button>
+
+        </form>
+
+        <button id="agenda-refresh">Atualizar</button>
+
+        <a class="tool-link"
+           href="/api/agenda/ics"
+           download>
+
+            Exportar para Google Calendar / Outlook
+
+        </a>
+
+        <p>
+            Os lembretes aparecem enquanto a LIA estiver aberta.
+        </p>
+
+        <div id="agenda-list"></div>
+
+    </section>
+
+    <!-- CONVERSAS -->
+
+    <section data-pane="conversations" hidden>
+
+        <h3>Conversas salvas</h3>
+
+        <button id="conversations-refresh">
+            Atualizar lista
+        </button>
+
+        <div id="conversations-list"></div>
+
+        <pre id="conversation-view"></pre>
+
+        <button id="conversation-older" hidden>
+            Mensagens anteriores
+        </button>
+
+        <button id="conversation-resume" hidden>
+            Continuar conversa
+        </button>
+
+    </section>
+
+    <!-- PERSONALIDADE -->
+
+    <section data-pane="prefs" hidden>
+
+        <h3>Personalizar LIA</h3>
+
+        <label>
+            Estilo
+
+            <select id="personality">
+                <option value="equilibrada">Equilibrada</option>
+                <option value="tecnica">Técnica</option>
+                <option value="professora">Professora</option>
+                <option value="objetiva">Objetiva</option>
+            </select>
+
+        </label>
+
+        <label>
+            <input type="checkbox" id="semantic-enabled">
+            Pesquisa semântica
+        </label>
+
+        <button id="prefs-save">Salvar</button>
+
+        <button id="index-memory">
+            Indexar lote de conversas
+        </button>
+
+        <p>
+            A pesquisa semântica requer nomic-embed-text
+            e pode aumentar o uso da memória RAM.
+        </p>
+
+    </section>
+
+    <!-- VOZ OFFLINE -->
+
+    <section data-pane="voice" hidden>
+
+        <h3>Reconhecimento local com Vosk</h3>
+
+        <p>
+            Grave até 30 segundos.
+            No Codespaces, o áudio é enviado ao servidor.
+            O funcionamento totalmente offline requer
+            instalação no computador.
+        </p>
+
+        <button id="record-offline">Gravar</button>
+
+        <button id="stop-offline" disabled>
+            Parar e transcrever
+        </button>
+
+        <textarea id="offline-text"
+                  placeholder="Transcrição para revisar"></textarea>
+
+        <button id="offline-send">
+            Usar texto no chat
+        </button>
+
+    </section>
+
+    <!-- DISPOSITIVOS -->
+
+    <section data-pane="devices" hidden>
+
+        <h3>Celular e computador</h3>
+
+        <p>
+            Confira o número e confirme a ação.
+            A LIA abre o aplicativo correspondente.
+            Você realiza o envio ou a ligação.
+        </p>
+
+        <label>
+            Telefone
+
+            <input id="phone-number"
+                   type="tel"
+                   placeholder="+55 DDD número"
+                   maxlength="25">
+        </label>
+
+        <label>
+            Mensagem
+
+            <textarea id="phone-message"
+                      maxlength="1000"
+                      placeholder="Mensagem para revisar"></textarea>
+
+        </label>
+
+        <button id="phone-call">Abrir discador</button>
+        <button id="phone-sms">Abrir SMS</button>
+        <button id="phone-whatsapp">Abrir WhatsApp</button>
+        <button id="copy-message">Copiar mensagem</button>
+
+    </section>
+
+    <p id="tool-status"
+       role="status"
+       aria-live="polite"></p>
+
+</dialog>
+
+<!-- NOTIFICAÇÕES -->
+
+<div id="reminder-banner" hidden role="alert">
+
+    <span id="reminder-text"></span>
+
+    <button id="reminder-done">Concluir</button>
+    <button id="reminder-dismiss">Dispensar</button>
+
+</div>
+
+<!-- INTEGRAÇÕES ORIGINAIS -->
+
+<script src="/static/lia.js?v=5.2"></script>
+<script src="/static/tools.js"></script>
+
+<!-- ======================================
+     MOTOR HOLOGRÁFICO 3D ORIGINAL
+====================================== -->
+
+<script>
+(() => {
+
+  if(typeof window.draw==='function') window.draw=()=>{};
+
+  const c=document.getElementById('orb'), g=c.getContext('2d');
+
+  const state=document.getElementById('lia-state'), label=document.getElementById('lia-state-text');
+
+  const root=document.getElementById('lia-main'), reply=document.getElementById('reply');
+
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+
+  const TAU=Math.PI*2; let last=0, phase=0, dragX=0, dragY=0, pointer=null;
+
+  function currentMode(){try{return typeof mode==='string'?mode:'idle'}catch(e){return 'idle'}}
+
+  function resize(){let w=Math.max(1,Math.round(c.clientWidth*Math.min(2,devicePixelRatio||1)));if(c.width!==w||c.height!==w)c.width=c.height=w}
+
+  function arc(r,a,b,col,w=1){g.beginPath();g.arc(0,0,r,a,b);g.strokeStyle=col;g.lineWidth=w;g.stroke()}
+
+  function line(x,y,X,Y,col,w=1){g.beginPath();g.moveTo(x,y);g.lineTo(X,Y);g.strokeStyle=col;g.lineWidth=w;g.stroke()}
+
+  function polar(r,a){return [r*Math.cos(a),r*Math.sin(a)]}
+
+  function radial(a,r,R,col,w=1){line(...polar(r,a),...polar(R,a),col,w)}
+
+  function ring(r,n,span,offset,col,w){for(let i=0;i<n;i++){let a=offset+i*TAU/n;arc(r,a,a+TAU/n*span,col,w)}}
+
+  function text(s,x,y,size=8,col='#c7a2f8',align='center'){g.font=`${size}px monospace`;g.textAlign=align;g.fillStyle=col;g.fillText(s,x,y)}
+
+  function panel(r,R,a,b,col){g.beginPath();g.arc(0,0,R,a,b);g.arc(0,0,r,b,a,true);g.closePath();g.fillStyle=col;g.fill();g.strokeStyle='#bf8aff66';g.lineWidth=.7;g.stroke()}
+
+  function rotate(p,ax,ay){let[x,y,z]=p;let ca=Math.cos(ax),sa=Math.sin(ax),cb=Math.cos(ay),sb=Math.sin(ay);let Y=y*ca-z*sa,Z=y*sa+z*ca;return [x*cb+Z*sb,Y,-x*sb+Z*cb]}
+
+  function project(p){let k=410/(410-p[2]);return [p[0]*k,p[1]*k,p[2]]}
+
+  function sphere(r,a,b){return [r*Math.cos(b)*Math.cos(a),r*Math.sin(b),r*Math.cos(b)*Math.sin(a)]}
+
+  function mesh(r,ax,ay){
+
+    const paths=[];function curve(fn,n){let prev=project(rotate(fn(0),ax,ay));for(let j=1;j<=n;j++){let q=project(rotate(fn(j/n),ax,ay));paths.push([prev,q,(q[2]+prev[2])/2]);prev=q}}
+
+    for(let i=1;i<12;i++)curve(t=>sphere(r,t*TAU,-Math.PI/2+i*Math.PI/12),64);
+
+    for(let i=0;i<18;i++)curve(t=>sphere(r,i*TAU/18,-Math.PI/2+t*Math.PI),32);
+
+    paths.sort((a,b)=>a[2]-b[2]);for(const [a,b,z] of paths){const opacity=.07+.53*(z+r)/(2*r);line(a[0],a[1],b[0],b[1],`rgba(199,147,255,${opacity})`,z>0?.8:.55)}
+
+    for(let i=0;i<90;i++){let z=1-2*(i+.5)/90,a=i*2.39996,b=Math.asin(z),p=project(rotate(sphere(r,a,b),ax,ay));if(p[2]<0)continue;g.fillStyle=i%9===0?'#f5dcff':'#a966ec';g.fillRect(p[0],p[1],i%9===0?2:1,i%9===0?2:1)}
+
+  }
+
+  function paint(ms){if(!g||document.hidden)return;resize();const m=currentMode(),active=m!=='idle',dt=Math.min(.08,Math.max(0,(ms-last)/1000));last=ms;if(!reduced.matches)phase+=dt*(active?1.2:.5);const t=phase, pulse=reduced.matches?0:Math.sin(t*6)*(active?1:.25);const hi='#ead2ff',violet='#b77aff';g.setTransform(c.width/600,0,0,c.height/600,c.width/2,c.height/2);g.clearRect(-300,-300,600,600);
+
+    let glow=g.createRadialGradient(0,0,0,0,0,286);glow.addColorStop(0,'#ad54ff35');glow.addColorStop(.38,'#6c24b124');glow.addColorStop(.78,'#36146d12');glow.addColorStop(1,'#0000');g.fillStyle=glow;g.fillRect(-290,-290,580,580);
+
+    // Marcações e anéis externos.
+
+    for(let i=0;i<4;i++){let a=i*Math.PI/2;radial(a,246,286,'#c89aff70');let [x,y]=polar(290,a);g.fillStyle='#c89aff';g.fillRect(x-1,y-1,2,2)}
+
+    arc(269,0,TAU,'#b67bff25',.65);arc(258,0,TAU,'#b67bff4d',.8);
+
+    for(let i=0;i<180;i++){let a=i*TAU/180;radial(a,250-(i%5===0?8:0),254,i%5===0?'#d4b0ff99':'#a66deb50',i%5===0?1.1:.6)}
+
+    for(let i=0;i<12;i++){let a=i*TAU/12-Math.PI/2;let[x,y]=polar(277,a);text(String(i*30).padStart(3,'0'),x,y+3,7,'#aa83d3')}
+
+    ring(239,4,.80,t*.13,'#a366e8',1.2);ring(234,4,.78,t*.13,'#d0a7ff42',.7);
+
+    for(let i=0;i<8;i++){let a=i*TAU/8-t*.10;panel(214,229,a,a+.53,i%2?'#7d35d022':'#b97af43e');arc(228,a+.02,a+.50,'#cf9eff',1.5);for(let j=0;j<9;j++)radial(a+.035+j*.05,216,222,'#caa0ff60')}
+
+    arc(205,0,TAU,'#a975f14d',.8);ring(199,36,.62,-t*.2,'#d09aff8c',2.2);
+
+    for(let i=0;i<6;i++){let a=i*TAU/6+t*.20;panel(177,190,a,a+.53,'#7439bc3a');arc(187,a+.04,a+.48,'#e0bbff',2.3);arc(180,a+.04,a+.48,'#9b55e6',.8);radial(a+.06,173,177,'#d9adff')}
+
+    arc(170,0,TAU,'#9f66f071',1);ring(165,3,.53,-t*.28,'#c48bff',3);ring(156,60,.24,t*.12,'#b88bec80',1.4);
+
+    // Órbitas tridimensionais.
+
+    const ax=.33+dragY,ay=t*.24+dragX;for(let j=0;j<3;j++){let prev=null;for(let i=0;i<=100;i++){let a=i*TAU/100,p=project(rotate(rotate([139*Math.cos(a),139*Math.sin(a),0],.75+j*.92,j*1.09),ax,ay));if(prev)line(prev[0],prev[1],p[0],p[1],p[2]>0?'#c791ff78':'#9a55d72a',p[2]>0?1.4:.7);prev=p}}
+
+    let core=g.createRadialGradient(-22,-28,0,0,0,123);core.addColorStop(0,'#bd7bff30');core.addColorStop(.7,'#39175c40');core.addColorStop(1,'#6a26a50a');g.fillStyle=core;g.beginPath();g.arc(0,0,120,0,TAU);g.fill();mesh(116+2*pulse,ax,ay);arc(124,0,TAU,'#c994ff65',.8);
+
+    // Identidade central e ondas de energia.
+
+    g.fillStyle='#0b071bd9';g.fillRect(-64,-21,128,42);line(-64,-21,64,-21,'#c994ff88');line(-64,21,64,21,'#c994ff88');text('L I A',0,6,24,hi);text('N E U R A L  C O R E',0,37,7,violet);
+
+    for(let i=0;i<48;i++){let a=i*TAU/48;let h=3+(active?18:5)*Math.abs(Math.sin(i*1.7+t*4)*Math.cos(i*.53-t*1.2));radial(a,147-h/2,147+h/2,i%4===0?hi:'#a96beb77',1.5)}
+
+    g.save();g.shadowColor='#b873ff';g.shadowBlur=14;arc(239,t*.5,t*.5+.34,hi,2.8);arc(165,-t*.8,-t*.8+.28,hi,3);g.restore();
+
+  }
+
+  let previousMode='';function sync(){const m=currentMode();if(m!==previousMode){previousMode=m;state.dataset.mode=m;label.textContent=({idle:'Em espera',thinking:'Processando resposta',listening:'Ouvindo',speaking:'Falando'})[m]||'Em espera'}const s=document.getElementById('status');if(s)document.getElementById('lia-live').textContent=s.textContent||'Interface pronta'}
+
+  let lastPaint=0;function frame(ms){if(ms-lastPaint>=40){if(!reduced.matches)paint(ms);lastPaint=ms;sync()}requestAnimationFrame(frame)}paint(0);requestAnimationFrame(frame);new ResizeObserver(()=>paint(performance.now())).observe(c);
+
+  c.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;pointer={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(!pointer)return;dragX+=(e.clientX-pointer.x)*.008;dragY+=(e.clientY-pointer.y)*.008;pointer={x:e.clientX,y:e.clientY};if(reduced.matches)paint(0)});for(const n of ['pointerup','pointercancel','lostpointercapture'])c.addEventListener(n,()=>pointer=null);
+
+  new MutationObserver(()=>{root.classList.toggle('has-reply',!!reply.textContent.trim());reply.scrollTop=0}).observe(reply,{childList:true,characterData:true,subtree:true});
+
+  document.querySelectorAll('[data-lia-action]').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.liaAction,click=id=>document.getElementById(id)?.click();if(action==='settings'){click('menu');return}if(action==='listen'){click('listen');return}if(action==='memory'){click('menu');click('memory');return}click('tools-open');document.querySelector('[data-tab="'+action+'"]')?.click()}));
+
+  const clock=()=>document.getElementById('lia-clock').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});clock();setInterval(clock,15000);sync();
+
+})();
+</script>
+
+<!-- ======================================
+     TEMA E DESAPARECIMENTO DAS RESPOSTAS
+====================================== -->
+
+<script>
+(() => {
+
+    const doc = document.documentElement;
+    const themeButton = document.getElementById("lia-theme-toggle");
+    const root = document.getElementById("lia-main");
+    const reply = document.getElementById("reply");
+    const toggle = document.getElementById("lia-text-toggle");
+    const auto = document.getElementById("lia-auto-hide");
+    const status = document.getElementById("status");
+    const state = document.getElementById("lia-state");
+
+    function read(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    }
+
+    function save(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch {}
+    }
+
+    /* ALTERAR TEMA */
+
+    function setTheme(theme) {
+
+        const light = theme === "light";
+
+        doc.dataset.liaTheme = light ? "light" : "dark";
+
+        themeButton.setAttribute(
+            "aria-pressed",
+            String(light)
+        );
+
+        themeButton.setAttribute(
+            "aria-label",
+            light ? "Ativar modo escuro" : "Ativar modo claro"
+        );
+
+        themeButton.title =
+            themeButton.getAttribute("aria-label");
+
+        document.querySelector(
+            'meta[name="theme-color"]'
+        ).content = light ? "#f8f5fc" : "#140c22";
+
+    }
+
+    setTheme(doc.dataset.liaTheme || "dark");
+
+    themeButton.addEventListener("click", () => {
+
+        const next =
+            doc.dataset.liaTheme === "light"
+            ? "dark"
+            : "light";
+
+        setTheme(next);
+
+        save("lia-interface-theme", next);
+
+    });
+
+    /* PREFERÊNCIA DE TEXTO */
+
+    auto.checked =
+        read("lia-auto-hide-text") !== "false";
+
+    let timer = 0;
+    let previous = "idle";
+    let spokenText = "";
+    let manual = false;
+
+    function clearTimer() {
+
+        clearTimeout(timer);
+        timer = 0;
+
+    }
+
+    function setHidden(hidden) {
+
+        hidden = hidden && !!reply.textContent.trim();
+
+        root.classList.toggle("text-hidden", hidden);
+
+        toggle.textContent = hidden
+            ? "Mostrar resposta"
+            : "Ocultar texto";
+
+        toggle.setAttribute(
+            "aria-expanded",
+            String(!hidden)
+        );
+
+    }
+
+    function validAnswer(text) {
+
+        return !!text &&
+            !/^(LIA está pensando|Estou ouvindo|Não consegui consultar|Reconhecimento de voz indisponível)/i.test(text);
+
+    }
+
+    /* MOSTRAR NOVA RESPOSTA */
+
+    function updateText() {
+
+        clearTimer();
+
+        manual = false;
+        spokenText = "";
+
+        setHidden(false);
+
+        toggle.hidden = !reply.textContent.trim();
+
+    }
+
+    new MutationObserver(updateText).observe(reply, {
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+
+    /* ESCONDER TEXTO APÓS A FALA */
+
+    function updateMode() {
+
+        const m = state.dataset.mode || "idle";
+        const text = reply.textContent.trim();
+
+        root.dataset.conversation =
+            m === "idle" ? "idle" : "active";
+
+        if (m === "speaking" && validAnswer(text)) {
+
+            spokenText = text;
+
+        }
+
+        if (m !== previous) {
+
+            clearTimer();
+
+            if (
+                m === "idle" &&
+                previous === "speaking" &&
+                auto.checked &&
+                !manual &&
+                spokenText === text &&
+                validAnswer(text) &&
+                !/falha ao falar/i.test(status.textContent)
+            ) {
+
+                timer = setTimeout(() => {
+
+                    if (
+                        state.dataset.mode === "idle" &&
+                        reply.textContent.trim() === text &&
+                        !manual &&
+                        auto.checked &&
+                        !reply.matches(":hover") &&
+                        document.activeElement !== reply &&
+                        !window.getSelection()?.toString()
+                    ) {
+
+                        setHidden(true);
+
+                    }
+
+                }, 8000);
+
+            }
+
+            previous = m;
+
+        }
+
+    }
+
+    new MutationObserver(updateMode).observe(state, {
+        attributes: true,
+        attributeFilter: ["data-mode"]
+    });
+
+    /* MOSTRAR OU OCULTAR MANUALMENTE */
+
+    toggle.addEventListener("click", () => {
+
+        clearTimer();
+
+        manual = true;
+
+        setHidden(
+            !root.classList.contains("text-hidden")
+        );
+
+    });
+
+    auto.addEventListener("change", () => {
+
+        save(
+            "lia-auto-hide-text",
+            String(auto.checked)
+        );
+
+        clearTimer();
+
+        if (!auto.checked) {
+
+            setHidden(false);
+
+        }
+
+    });
+
+    /* NÃO OCULTAR ENQUANTO O USUÁRIO LÊ */
+
+    for (const eventName of [
+        "pointerdown",
+        "focusin",
+        "wheel",
+        "touchstart"
+    ]) {
+
+        reply.addEventListener(eventName, () => {
+
+            manual = true;
+            clearTimer();
+
+        }, { passive: true });
+
+    }
+
+    updateText();
+    updateMode();
+
+})();
+</script>
+
+</body>
+</html>

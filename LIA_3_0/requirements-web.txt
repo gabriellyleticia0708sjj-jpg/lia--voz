@@ -1,0 +1,6 @@
+Flask>=3.0,<4
+edge-tts>=7,<8
+pypdf>=5,<8
+Pillow>=10,<14
+ddgs>=9,<11
+vosk>=0.3.45,<1
